@@ -1,3 +1,4 @@
+import '../../features/profile/view/create_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -28,9 +29,13 @@ class AppRouter {
       };
 
       // Usuario no autenticado intentando entrar al área privada.
-      if (!isLoggedIn && currentPath == '/home') {
+      final isPrivateRoute =
+        currentPath == '/home' ||
+        currentPath.startsWith('/profile');
+      
+      if (!isLoggedIn && isPrivateRoute) {
         return '/auth';
-      }
+        }
 
       // Usuario autenticado intentando volver a las pantallas
       // de autenticación.
@@ -72,6 +77,12 @@ class AppRouter {
         builder: (context, state) =>
             const InitialMenuScreen(),
       ),
+      GoRoute(
+        path: '/profile/create',
+        name: 'create-profile',
+        builder: (context, state) =>
+            const CreateProfileScreen(),
+            ),
     ],
   );
 }

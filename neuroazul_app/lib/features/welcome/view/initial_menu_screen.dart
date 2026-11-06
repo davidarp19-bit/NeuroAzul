@@ -39,7 +39,8 @@ class InitialMenuScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) {
-    final authState = ref.watch(authViewModelProvider);
+    final authState =
+        ref.watch(authViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -56,39 +57,66 @@ class InitialMenuScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment:
-                MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.waving_hand_outlined,
-                size: 70,
-                color: AppColors.primary,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                '¡Bienvenido a NeuroAzul!',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment:
+                  MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.waving_hand_outlined,
+                  size: 70,
+                  color: AppColors.primary,
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Muy pronto aquí podrás crear y gestionar los perfiles infantiles.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 17,
-                  height: 1.5,
-                  color: AppColors.textSecondary,
+
+                const SizedBox(height: 24),
+
+                const Text(
+                  '¡Bienvenido a NeuroAzul!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 16),
+
+                const Text(
+                  'Aquí podrás crear y gestionar los perfiles infantiles.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    height: 1.5,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                SizedBox(
+                  width: 280,
+                  height: 54,
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      context.go('/profile/create');
+                    },
+                    icon: const Icon(
+                      Icons.person_add_alt_1_outlined,
+                    ),
+                    label: const Text(
+                      'Crear perfil infantil',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
