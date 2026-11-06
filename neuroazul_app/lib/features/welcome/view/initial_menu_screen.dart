@@ -100,6 +100,27 @@ class InitialMenuScreen extends ConsumerWidget {
                 SizedBox(
                   width: 280,
                   height: 54,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      context.go('/profiles');
+                    },
+                    icon: const Icon(
+                      Icons.people_outline,
+                    ),
+                    label: const Text(
+                      'Ver perfiles infantiles',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                SizedBox(
+                  width: 280,
+                  height: 54,
                   child: FilledButton.icon(
                     onPressed: () {
                       context.go('/profile/create');

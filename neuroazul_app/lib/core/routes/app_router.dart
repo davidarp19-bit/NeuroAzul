@@ -1,3 +1,4 @@
+import '../../features/profile/view/profiles_screen.dart';
 import '../../features/profile/view/create_profile_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -82,6 +83,12 @@ class AppRouter {
         name: 'create-profile',
         builder: (context, state) =>
             const CreateProfileScreen(),
+            ),
+    GoRoute(
+        path: '/profiles',
+        name: 'profiles',
+        builder: (context, state) =>
+            const ProfilesScreen(),
             ),
     ],
   );
