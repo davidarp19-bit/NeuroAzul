@@ -23,7 +23,17 @@ class ProfileRepository {
         .toList();
   }
 
-  Future<ChildProfile> createProfile({
+  Future<ChildProfile> getProfileById(
+    String profileId,
+    ) async {
+    final response = await _client
+        .from('child_profiles')
+        .select()
+        .eq('id', profileId)
+        .single();
+    return ChildProfile.fromMap(response);
+}
+createProfile({
     required String alias,
     required String ageRange,
     String? avatarKey,

@@ -1,3 +1,4 @@
+import '../../features/profile/view/edit_profile_screen.dart';
 import '../../features/profile/view/profiles_screen.dart';
 import '../../features/profile/view/create_profile_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -90,6 +91,18 @@ class AppRouter {
         builder: (context, state) =>
             const ProfilesScreen(),
             ),
+    GoRoute(
+        path: '/profile/:id/edit',
+        name: 'edit-profile',
+        builder: (context, state) {
+            final profileId =
+                state.pathParameters['id']!;
+                
+            return EditProfileScreen(
+                profileId: profileId,
+            );
+        },
+    ),
     ],
   );
 }

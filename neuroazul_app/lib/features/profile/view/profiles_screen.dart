@@ -9,27 +9,22 @@ class ProfilesScreen extends ConsumerStatefulWidget {
   const ProfilesScreen({super.key});
 
   @override
-  ConsumerState<ProfilesScreen> createState() =>
-      _ProfilesScreenState();
+  ConsumerState<ProfilesScreen> createState() => _ProfilesScreenState();
 }
 
-class _ProfilesScreenState
-    extends ConsumerState<ProfilesScreen> {
+class _ProfilesScreenState extends ConsumerState<ProfilesScreen> {
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(profileViewModelProvider.notifier)
-          .loadProfiles();
+      ref.read(profileViewModelProvider.notifier).loadProfiles();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final profileState =
-        ref.watch(profileViewModelProvider);
+    final profileState = ref.watch(profileViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -41,7 +36,6 @@ class _ProfilesScreenState
           icon: const Icon(Icons.arrow_back),
         ),
       ),
-
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           context.go('/profile/create');
@@ -49,15 +43,11 @@ class _ProfilesScreenState
         icon: const Icon(Icons.person_add_alt_1),
         label: const Text('Nuevo perfil'),
       ),
-
       body: SafeArea(
         child: Builder(
           builder: (context) {
-            if (profileState.isLoading &&
-                profileState.profiles.isEmpty) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+            if (profileState.isLoading && profileState.profiles.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
             }
 
             if (profileState.errorMessage != null &&
@@ -82,15 +72,10 @@ class _ProfilesScreenState
                       FilledButton(
                         onPressed: () {
                           ref
-                              .read(
-                                profileViewModelProvider
-                                    .notifier,
-                              )
+                              .read(profileViewModelProvider.notifier)
                               .loadProfiles();
                         },
-                        child: const Text(
-                          'Intentar nuevamente',
-                        ),
+                        child: const Text('Intentar nuevamente'),
                       ),
                     ],
                   ),
@@ -134,12 +119,8 @@ class _ProfilesScreenState
                         onPressed: () {
                           context.go('/profile/create');
                         },
-                        icon: const Icon(
-                          Icons.person_add_alt_1,
-                        ),
-                        label: const Text(
-                          'Crear perfil',
-                        ),
+                        icon: const Icon(Icons.person_add_alt_1),
+                        label: const Text('Crear perfil'),
                       ),
                     ],
                   ),
@@ -150,31 +131,25 @@ class _ProfilesScreenState
             return RefreshIndicator(
               onRefresh: () async {
                 await ref
-                    .read(
-                      profileViewModelProvider.notifier,
-                    )
+                    .read(profileViewModelProvider.notifier)
                     .loadProfiles();
               },
               child: ListView.separated(
                 padding: const EdgeInsets.all(24),
-                itemCount:
-                    profileState.profiles.length,
-                separatorBuilder: (_, __) =>
+                itemCount: profileState.profiles.length,
+                separatorBuilder: (context, index) =>
                     const SizedBox(height: 12),
                 itemBuilder: (context, index) {
-                  final profile =
-                      profileState.profiles[index];
+                  final profile = profileState.profiles[index];
 
                   return Card(
                     child: ListTile(
-                      contentPadding:
-                          const EdgeInsets.symmetric(
+                      contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 12,
                       ),
                       leading: const CircleAvatar(
-                        backgroundColor:
-                            AppColors.primaryLight,
+                        backgroundColor: AppColors.primaryLight,
                         child: Icon(
                           Icons.child_care_outlined,
                           color: AppColors.primary,
@@ -187,12 +162,11 @@ class _ProfilesScreenState
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      subtitle: Text(
-                        '${profile.ageRange} años',
-                      ),
-                      trailing: const Icon(
-                        Icons.chevron_right,
-                      ),
+                      subtitle: Text('${profile.ageRange} años'),
+                      trailing: const Icon(Icons.edit_outlined),
+                      onTap: () {
+                        context.go('/profile/${profile.id}/edit');
+                      },
                     ),
                   );
                 },
