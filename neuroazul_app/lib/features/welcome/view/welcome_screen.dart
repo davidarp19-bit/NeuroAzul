@@ -72,8 +72,8 @@ class WelcomeScreen extends StatelessWidget {
                     height: 58,
                     child: FilledButton(
                       onPressed: () {
-                        context.go('/home');
-                      },
+  context.go('/auth');
+},
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
