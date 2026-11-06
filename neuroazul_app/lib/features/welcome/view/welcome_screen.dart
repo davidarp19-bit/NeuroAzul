@@ -1,7 +1,7 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
-import 'initial_menu_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -72,13 +72,7 @@ class WelcomeScreen extends StatelessWidget {
                     height: 58,
                     child: FilledButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const InitialMenuScreen(),
-                          ),
-                        );
+                        context.go('/home');
                       },
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,

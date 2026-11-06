@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'core/routes/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'features/welcome/view/welcome_screen.dart';
 
 void main() {
   runApp(const NeuroAzulApp());
@@ -12,11 +12,11 @@ class NeuroAzulApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'NeuroAzul',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const WelcomeScreen(),
+      routerConfig: AppRouter.router,
     );
   }
 }

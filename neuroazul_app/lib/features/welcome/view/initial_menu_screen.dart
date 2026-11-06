@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -45,7 +46,7 @@ class InitialMenuScreen extends StatelessWidget {
               const SizedBox(height: 32),
               OutlinedButton.icon(
                 onPressed: () {
-                  Navigator.pop(context);
+                  context.go('/');
                 },
                 icon: const Icon(Icons.arrow_back),
                 label: const Text('Volver'),
