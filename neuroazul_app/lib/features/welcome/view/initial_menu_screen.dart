@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_theme.dart';
+
 class InitialMenuScreen extends StatelessWidget {
   const InitialMenuScreen({super.key});
 
@@ -8,8 +10,6 @@ class InitialMenuScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('NeuroAzul'),
-        centerTitle: true,
-        backgroundColor: const Color(0xFFE7F0F8),
       ),
       body: Center(
         child: Padding(
@@ -20,7 +20,7 @@ class InitialMenuScreen extends StatelessWidget {
               const Icon(
                 Icons.waving_hand_outlined,
                 size: 70,
-                color: Color(0xFF4F7CAC),
+                color: AppColors.primary,
               ),
               const SizedBox(height: 24),
               const Text(
@@ -29,7 +29,7 @@ class InitialMenuScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF294C60),
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -39,7 +39,7 @@ class InitialMenuScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 17,
                   height: 1.5,
-                  color: Color(0xFF4A5568),
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 32),

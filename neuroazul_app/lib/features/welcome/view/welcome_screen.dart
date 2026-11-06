@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_theme.dart';
 import 'initial_menu_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -26,13 +27,13 @@ class WelcomeScreen extends StatelessWidget {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE7F0F8),
+                      color: AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: const Icon(
                       Icons.psychology_alt_outlined,
                       size: 70,
-                      color: Color(0xFF4F7CAC),
+                      color: AppColors.primary,
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -42,7 +43,7 @@ class WelcomeScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF294C60),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -52,7 +53,7 @@ class WelcomeScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 19,
                       height: 1.5,
-                      color: Color(0xFF4A5568),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -62,7 +63,7 @@ class WelcomeScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       height: 1.5,
-                      color: Color(0xFF718096),
+                      color: AppColors.textMuted,
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -80,7 +81,7 @@ class WelcomeScreen extends StatelessWidget {
                         );
                       },
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF4F7CAC),
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -99,7 +100,7 @@ class WelcomeScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF718096),
+                      color: AppColors.textMuted,
                     ),
                   ),
                 ],
