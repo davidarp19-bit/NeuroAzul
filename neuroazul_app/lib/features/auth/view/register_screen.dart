@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../viewmodel/auth_viewmodel.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() =>
+      _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState
+    extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
@@ -28,12 +32,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _validateForm() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _register() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final success = await ref
+        .read(authViewModelProvider.notifier)
+        .register(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+
+    if (!mounted) return;
+
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Datos válidos. El registro se conectará posteriormente.',
+            'Cuenta creada. Revisa tu correo para confirmar el registro.',
+          ),
+        ),
+      );
+
+      context.go('/login');
+    } else {
+      final error =
+          ref.read(authViewModelProvider).errorMessage;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error ?? 'No fue posible crear la cuenta.',
           ),
         ),
       );
@@ -42,6 +72,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authViewModelProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Crear cuenta'),
@@ -57,7 +89,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(32),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 500),
+              constraints: const BoxConstraints(
+                maxWidth: 500,
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -67,9 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       size: 75,
                       color: AppColors.primary,
                     ),
-
                     const SizedBox(height: 24),
-
                     const Text(
                       'Crea tu cuenta',
                       textAlign: TextAlign.center,
@@ -79,9 +111,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         color: AppColors.textPrimary,
                       ),
                     ),
-
                     const SizedBox(height: 12),
-
                     const Text(
                       'Esta cuenta será utilizada por el adulto responsable para gestionar los perfiles infantiles.',
                       textAlign: TextAlign.center,
@@ -91,19 +121,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         color: AppColors.textSecondary,
                       ),
                     ),
-
                     const SizedBox(height: 32),
 
+                    // Correo
                     TextFormField(
                       controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
+                      keyboardType:
+                          TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         labelText: 'Correo electrónico',
-                        prefixIcon: Icon(Icons.email_outlined),
+                        prefixIcon:
+                            Icon(Icons.email_outlined),
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
+                        if (value == null ||
+                            value.trim().isEmpty) {
                           return 'Ingresa tu correo electrónico';
                         }
 
@@ -117,28 +150,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     const SizedBox(height: 20),
 
+                    // Contraseña
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         labelText: 'Contraseña',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        border: const OutlineInputBorder(),
+                        prefixIcon:
+                            const Icon(Icons.lock_outline),
+                        border:
+                            const OutlineInputBorder(),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
-                              _obscurePassword = !_obscurePassword;
+                              _obscurePassword =
+                                  !_obscurePassword;
                             });
                           },
                           icon: Icon(
                             _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                                ? Icons
+                                    .visibility_outlined
+                                : Icons
+                                    .visibility_off_outlined,
                           ),
                         ),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null ||
+                            value.isEmpty) {
                           return 'Crea una contraseña';
                         }
 
@@ -152,13 +192,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     const SizedBox(height: 20),
 
+                    // Confirmación
                     TextFormField(
-                      controller: _confirmPasswordController,
-                      obscureText: _obscureConfirmation,
+                      controller:
+                          _confirmPasswordController,
+                      obscureText:
+                          _obscureConfirmation,
                       decoration: InputDecoration(
-                        labelText: 'Confirmar contraseña',
-                        prefixIcon: const Icon(Icons.lock_reset_outlined),
-                        border: const OutlineInputBorder(),
+                        labelText:
+                            'Confirmar contraseña',
+                        prefixIcon: const Icon(
+                          Icons.lock_reset_outlined,
+                        ),
+                        border:
+                            const OutlineInputBorder(),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -168,17 +215,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                           icon: Icon(
                             _obscureConfirmation
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                                ? Icons
+                                    .visibility_outlined
+                                : Icons
+                                    .visibility_off_outlined,
                           ),
                         ),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null ||
+                            value.isEmpty) {
                           return 'Confirma tu contraseña';
                         }
 
-                        if (value != _passwordController.text) {
+                        if (value !=
+                            _passwordController.text) {
                           return 'Las contraseñas no coinciden';
                         }
 
@@ -192,15 +243,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       width: double.infinity,
                       height: 56,
                       child: FilledButton(
-                        onPressed: _validateForm,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                        onPressed:
+                            authState.isLoading
+                                ? null
+                                : _register,
+                        style:
+                            FilledButton.styleFrom(
+                          backgroundColor:
+                              AppColors.primary,
+                          foregroundColor:
+                              Colors.white,
                         ),
-                        child: const Text(
-                          'Crear cuenta',
-                          style: TextStyle(fontSize: 17),
-                        ),
+                        child: authState.isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child:
+                                    CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                'Crear cuenta',
+                                style: TextStyle(
+                                  fontSize: 17,
+                                ),
+                              ),
                       ),
                     ),
 
