@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../viewmodel/auth_viewmodel.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() =>
+      _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
@@ -25,12 +28,39 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _validateForm() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final success = await ref
+        .read(authViewModelProvider.notifier)
+        .login(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+
+    if (!mounted) return;
+
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Datos válidos. La autenticación se conectará posteriormente.',
+            'Inicio de sesión exitoso.',
+          ),
+        ),
+      );
+
+      context.go('/home');
+    } else {
+      final error =
+          ref.read(authViewModelProvider).errorMessage;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error ??
+                'No fue posible iniciar sesión.',
           ),
         ),
       );
@@ -39,6 +69,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authViewModelProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Iniciar sesión'),
@@ -54,7 +86,9 @@ class _LoginScreenState extends State<LoginScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(32),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 500),
+              constraints: const BoxConstraints(
+                maxWidth: 500,
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -92,14 +126,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     TextFormField(
                       controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
+                      keyboardType:
+                          TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         labelText: 'Correo electrónico',
-                        prefixIcon: Icon(Icons.email_outlined),
+                        prefixIcon:
+                            Icon(Icons.email_outlined),
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
+                        if (value == null ||
+                            value.trim().isEmpty) {
                           return 'Ingresa tu correo electrónico';
                         }
 
@@ -118,23 +155,29 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         labelText: 'Contraseña',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        border: const OutlineInputBorder(),
+                        prefixIcon:
+                            const Icon(Icons.lock_outline),
+                        border:
+                            const OutlineInputBorder(),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
-                              _obscurePassword = !_obscurePassword;
+                              _obscurePassword =
+                                  !_obscurePassword;
                             });
                           },
                           icon: Icon(
                             _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                                ? Icons
+                                    .visibility_outlined
+                                : Icons
+                                    .visibility_off_outlined,
                           ),
                         ),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value == null ||
+                            value.isEmpty) {
                           return 'Ingresa tu contraseña';
                         }
 
@@ -148,15 +191,33 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: double.infinity,
                       height: 56,
                       child: FilledButton(
-                        onPressed: _validateForm,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                        onPressed:
+                            authState.isLoading
+                                ? null
+                                : _login,
+                        style:
+                            FilledButton.styleFrom(
+                          backgroundColor:
+                              AppColors.primary,
+                          foregroundColor:
+                              Colors.white,
                         ),
-                        child: const Text(
-                          'Ingresar',
-                          style: TextStyle(fontSize: 17),
-                        ),
+                        child: authState.isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child:
+                                    CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                'Ingresar',
+                                style: TextStyle(
+                                  fontSize: 17,
+                                ),
+                              ),
                       ),
                     ),
 

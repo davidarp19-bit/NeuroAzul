@@ -19,7 +19,8 @@ class AuthState {
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
+      errorMessage:
+          clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
 }
@@ -103,6 +104,36 @@ class AuthViewModel extends Notifier<AuthState> {
       state = state.copyWith(
         errorMessage:
             'Ocurrió un error inesperado. Intenta nuevamente.',
+      );
+
+      return false;
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
+  Future<bool> logout() async {
+    state = state.copyWith(
+      isLoading: true,
+      clearError: true,
+    );
+
+    try {
+      final repository = ref.read(authRepositoryProvider);
+
+      await repository.logout();
+
+      return true;
+    } on AuthException catch (error) {
+      state = state.copyWith(
+        errorMessage: error.message,
+      );
+
+      return false;
+    } catch (_) {
+      state = state.copyWith(
+        errorMessage:
+            'No fue posible cerrar la sesión. Intenta nuevamente.',
       );
 
       return false;
