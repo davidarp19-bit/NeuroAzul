@@ -163,9 +163,15 @@ class _ProfilesScreenState extends ConsumerState<ProfilesScreen> {
                         ),
                       ),
                       subtitle: Text('${profile.ageRange} años'),
-                      trailing: const Icon(Icons.edit_outlined),
+                      trailing: IconButton(
+                        tooltip: 'Editar perfil',
+                        onPressed: () {
+                          context.go('/profile/${profile.id}/edit');
+                        },
+                        icon: const Icon(Icons.edit_outlined),
+                      ),
                       onTap: () {
-                        context.go('/profile/${profile.id}/edit');
+                        context.go('/child/${profile.id}/menu');
                       },
                     ),
                   );
