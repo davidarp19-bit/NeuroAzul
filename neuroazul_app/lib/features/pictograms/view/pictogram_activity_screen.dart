@@ -1,36 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../data/pictogram_item.dart';
+import '../viewmodel/pictogram_viewmodel.dart';
 
-class PictogramActivityScreen extends StatefulWidget {
+class PictogramActivityScreen extends ConsumerStatefulWidget {
   final String profileId;
 
   const PictogramActivityScreen({super.key, required this.profileId});
 
   @override
-  State<PictogramActivityScreen> createState() =>
+  ConsumerState<PictogramActivityScreen> createState() =>
       _PictogramActivityScreenState();
 }
 
-class _PictogramActivityScreenState extends State<PictogramActivityScreen> {
+class _PictogramActivityScreenState
+    extends ConsumerState<PictogramActivityScreen> {
   int _currentQuestion = 0;
   String? _selectedId;
   bool? _isCorrect;
 
   final List<_PictogramQuestion> _questions = const [
     _PictogramQuestion(
+      id: 'question_house',
       prompt: '¿Dónde está la casa?',
       correctId: 'house',
       optionIds: ['house', 'food', 'school'],
     ),
     _PictogramQuestion(
+      id: 'question_water',
       prompt: '¿Cuál representa agua?',
       correctId: 'water',
       optionIds: ['play', 'water', 'bed'],
     ),
     _PictogramQuestion(
+      id: 'question_school',
       prompt: '¿Dónde aprendemos y estudiamos?',
       correctId: 'school',
       optionIds: ['school', 'house', 'play'],
@@ -41,12 +47,37 @@ class _PictogramActivityScreenState extends State<PictogramActivityScreen> {
     return pictogramItems.firstWhere((item) => item.id == id);
   }
 
-  void _selectAnswer(String id) {
+  Future<void> _selectAnswer(String id) async {
     final question = _questions[_currentQuestion];
+
+    final isCorrect = id == question.correctId;
+
+    final saved = await ref
+        .read(pictogramViewModelProvider.notifier)
+        .registerAttempt(
+          profileId: widget.profileId,
+          questionId: question.id,
+          selectedId: id,
+          isCorrect: isCorrect,
+        );
+
+    if (!mounted) return;
+
+    if (!saved) {
+      final error = ref.read(pictogramViewModelProvider).errorMessage;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error ?? 'No fue posible registrar la respuesta.'),
+        ),
+      );
+
+      return;
+    }
 
     setState(() {
       _selectedId = id;
-      _isCorrect = id == question.correctId;
+      _isCorrect = isCorrect;
     });
   }
 
@@ -108,6 +139,8 @@ class _PictogramActivityScreenState extends State<PictogramActivityScreen> {
   Widget build(BuildContext context) {
     final question = _questions[_currentQuestion];
 
+    final pictogramState = ref.watch(pictogramViewModelProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pictogramas'),
@@ -127,7 +160,8 @@ class _PictogramActivityScreenState extends State<PictogramActivityScreen> {
               child: Column(
                 children: [
                   Text(
-                    'Actividad ${_currentQuestion + 1} de ${_questions.length}',
+                    'Actividad ${_currentQuestion + 1} '
+                    'de ${_questions.length}',
                     style: const TextStyle(
                       fontSize: 15,
                       color: AppColors.textSecondary,
@@ -166,7 +200,7 @@ class _PictogramActivityScreenState extends State<PictogramActivityScreen> {
 
                       return InkWell(
                         borderRadius: BorderRadius.circular(18),
-                        onTap: _isCorrect == true
+                        onTap: pictogramState.isSaving || _isCorrect == true
                             ? null
                             : () {
                                 _selectAnswer(item.id);
@@ -209,6 +243,16 @@ class _PictogramActivityScreenState extends State<PictogramActivityScreen> {
                     },
                   ),
 
+                  if (pictogramState.isSaving) ...[
+                    const SizedBox(height: 24),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Registrando respuesta...',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ],
+
                   const SizedBox(height: 28),
 
                   if (_isCorrect == true)
@@ -239,11 +283,13 @@ class _PictogramActivityScreenState extends State<PictogramActivityScreen> {
 }
 
 class _PictogramQuestion {
+  final String id;
   final String prompt;
   final String correctId;
   final List<String> optionIds;
 
   const _PictogramQuestion({
+    required this.id,
     required this.prompt,
     required this.correctId,
     required this.optionIds,
