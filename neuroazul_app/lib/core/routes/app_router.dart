@@ -1,3 +1,5 @@
+import '../../features/pictograms/view/pictogram_activity_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -125,11 +127,7 @@ class AppRouter {
         builder: (context, state) {
           final profileId = state.pathParameters['id']!;
 
-          return SectionPlaceholderScreen(
-            profileId: profileId,
-            title: 'Pictogramas',
-            icon: Icons.image_outlined,
-          );
+          return PictogramActivityScreen(profileId: profileId);
         },
       ),
 
