@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../profile/data/avatar_option.dart';
 import '../../profile/data/child_profile.dart';
 import '../../profile/viewmodel/profile_viewmodel.dart';
 
@@ -64,6 +65,15 @@ class _ChildMenuScreenState extends ConsumerState<ChildMenuScreen> {
       );
     }
 
+    AvatarOption? selectedAvatar;
+
+    for (final avatar in avatarOptions) {
+      if (avatar.key == _profile!.avatarKey) {
+        selectedAvatar = avatar;
+        break;
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('NeuroAzul'),
@@ -83,10 +93,14 @@ class _ChildMenuScreenState extends ConsumerState<ChildMenuScreen> {
               constraints: const BoxConstraints(maxWidth: 700),
               child: Column(
                 children: [
-                  const Icon(
-                    Icons.waving_hand_outlined,
-                    size: 70,
-                    color: AppColors.primary,
+                  CircleAvatar(
+                    radius: 48,
+                    backgroundColor: AppColors.primaryLight,
+                    child: Icon(
+                      selectedAvatar?.icon ?? Icons.face_outlined,
+                      size: 55,
+                      color: AppColors.primary,
+                    ),
                   ),
 
                   const SizedBox(height: 16),
@@ -101,6 +115,17 @@ class _ChildMenuScreenState extends ConsumerState<ChildMenuScreen> {
                     ),
                   ),
 
+                  if (selectedAvatar != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Avatar: ${selectedAvatar.name}',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+
                   const SizedBox(height: 8),
 
                   const Text(
@@ -113,6 +138,17 @@ class _ChildMenuScreenState extends ConsumerState<ChildMenuScreen> {
                   ),
 
                   const SizedBox(height: 32),
+
+                  _MenuCard(
+                    icon: Icons.face_outlined,
+                    title: 'Mi avatar',
+                    description: 'Elige el personaje que te representa.',
+                    onTap: () {
+                      context.go('/child/${widget.profileId}/avatar');
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
 
                   _MenuCard(
                     icon: Icons.image_outlined,

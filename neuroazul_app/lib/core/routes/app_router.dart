@@ -7,6 +7,7 @@ import '../../features/auth/view/login_screen.dart';
 import '../../features/auth/view/register_screen.dart';
 import '../../features/child_menu/view/child_menu_screen.dart';
 import '../../features/child_menu/view/section_placeholder_screen.dart';
+import '../../features/profile/view/avatar_selection_screen.dart';
 import '../../features/profile/view/create_profile_screen.dart';
 import '../../features/profile/view/edit_profile_screen.dart';
 import '../../features/profile/view/profiles_screen.dart';
@@ -105,6 +106,16 @@ class AppRouter {
           final profileId = state.pathParameters['id']!;
 
           return ChildMenuScreen(profileId: profileId);
+        },
+      ),
+
+      GoRoute(
+        path: '/child/:id/avatar',
+        name: 'child-avatar',
+        builder: (context, state) {
+          final profileId = state.pathParameters['id']!;
+
+          return AvatarSelectionScreen(profileId: profileId);
         },
       ),
 
