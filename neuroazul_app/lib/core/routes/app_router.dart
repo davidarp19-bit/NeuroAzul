@@ -1,8 +1,10 @@
 import '../../features/pictograms/view/pictogram_activity_screen.dart';
+import '../../core/sync/sync_status_screen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../features/progress/view/progress_screen.dart';
 import '../../features/gamification/view/achievements_screen.dart';
 import '../../features/routines/view/feeding_routine_screen.dart';
@@ -188,17 +190,23 @@ class AppRouter {
       ),
 
       GoRoute(
-  path: '/child/:id/progress',
-  name: 'child-progress',
-  builder: (context, state) {
-    final profileId =
-        state.pathParameters['id']!;
+        path: '/child/:id/progress',
+        name: 'child-progress',
+        builder: (context, state) {
+          final profileId = state.pathParameters['id']!;
 
-    return ProgressScreen(
-      profileId: profileId,
-    );
-  },
-),
+          return ProgressScreen(profileId: profileId);
+        },
+      ),
+      GoRoute(
+        path: '/child/:id/sync',
+        name: 'child-sync',
+        builder: (context, state) {
+          final profileId = state.pathParameters['id']!;
+
+          return SyncStatusScreen(profileId: profileId);
+        },
+      ),
     ],
   );
 }

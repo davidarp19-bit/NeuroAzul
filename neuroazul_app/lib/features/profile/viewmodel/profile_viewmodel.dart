@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/database/database_providers.dart';
+
 import '../data/child_profile.dart';
 import '../data/profile_repository.dart';
 
@@ -30,7 +32,9 @@ class ProfileState {
 }
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
-  return ProfileRepository();
+  final localRepository = ref.watch(localProfileRepositoryProvider);
+
+  return ProfileRepository(localRepository: localRepository);
 });
 
 final profileViewModelProvider =

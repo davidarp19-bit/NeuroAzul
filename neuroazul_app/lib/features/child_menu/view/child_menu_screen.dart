@@ -195,9 +195,19 @@ class _ChildMenuScreenState extends ConsumerState<ChildMenuScreen> {
                   _MenuCard(
                     icon: Icons.insights_outlined,
                     title: 'Mi progreso',
-                    description: 'Consulta puntos y recompensas.',
+                    description:
+                        'Consulta el avance de las actividades realizadas.',
                     onTap: () {
                       context.go('/child/${widget.profileId}/progress');
+                    },
+                  ),
+
+                  _MenuCard(
+                    icon: Icons.sync_outlined,
+                    title: 'Sincronización',
+                    description: 'Consulta y sincroniza los intentos guardados localmente.',
+                    onTap: () {
+                      context.go('/child/${widget.profileId}/sync');
                     },
                   ),
                 ],

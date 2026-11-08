@@ -1,21 +1,32 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/database/database_providers.dart';
 import '../data/pictogram_repository.dart';
+
+enum AttemptSyncStatus { idle, synced, pending }
 
 class PictogramState {
   final bool isSaving;
+  final AttemptSyncStatus syncStatus;
   final String? errorMessage;
 
-  const PictogramState({this.isSaving = false, this.errorMessage});
+  const PictogramState({
+    this.isSaving = false,
+    this.syncStatus = AttemptSyncStatus.idle,
+    this.errorMessage,
+  });
 
   PictogramState copyWith({
     bool? isSaving,
+    AttemptSyncStatus? syncStatus,
     String? errorMessage,
     bool clearError = false,
   }) {
     return PictogramState(
       isSaving: isSaving ?? this.isSaving,
+      syncStatus: syncStatus ?? this.syncStatus,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
@@ -42,27 +53,66 @@ class PictogramViewModel extends Notifier<PictogramState> {
     required String selectedId,
     required bool isCorrect,
   }) async {
-    state = state.copyWith(isSaving: true, clearError: true);
+    state = state.copyWith(
+      isSaving: true,
+      syncStatus: AttemptSyncStatus.idle,
+      clearError: true,
+    );
 
     try {
-      final repository = ref.read(pictogramRepositoryProvider);
+      final localRepository = ref.read(localAttemptRepositoryProvider);
 
-      await repository.registerAttempt(
+      final localId = await localRepository.saveAttempt(
         profileId: profileId,
-        questionId: questionId,
-        selectedId: selectedId,
+        activityType: 'pictogram',
+        activityId: questionId,
+        selectedValue: selectedId,
         isCorrect: isCorrect,
       );
 
-      return true;
-    } on PostgrestException catch (error) {
-      state = state.copyWith(errorMessage: error.message);
+      try {
+        final remoteRepository = ref.read(pictogramRepositoryProvider);
 
-      return false;
-    } catch (_) {
-      state = state.copyWith(
-        errorMessage: 'No fue posible registrar la respuesta.',
-      );
+        await remoteRepository.registerAttempt(
+          profileId: profileId,
+          questionId: questionId,
+          selectedId: selectedId,
+          isCorrect: isCorrect,
+        );
+
+        await localRepository.markAsSynced(localId: localId);
+
+        state = state.copyWith(
+          syncStatus: AttemptSyncStatus.synced,
+          clearError: true,
+        );
+
+        return true;
+      } on PostgrestException catch (error) {
+        debugPrint('SUPABASE pendiente de sincronización: ${error.message}');
+
+        state = state.copyWith(
+          syncStatus: AttemptSyncStatus.pending,
+          errorMessage: 'El intento quedó guardado localmente y está pendiente de sincronización.',
+        );
+
+        return true;
+      } catch (error) {
+        debugPrint('CONEXIÓN pendiente de sincronización: $error');
+
+        state = state.copyWith(
+          syncStatus: AttemptSyncStatus.pending,
+          errorMessage: 'El intento quedó guardado localmente y está pendiente de sincronización.',
+        );
+
+        return true;
+      }
+    } catch (error, stackTrace) {
+      debugPrint('ERROR AL GUARDAR EN DRIFT: $error');
+
+      debugPrintStack(label: 'STACK TRACE DRIFT', stackTrace: stackTrace);
+
+      state = state.copyWith(errorMessage: 'Error local: $error');
 
       return false;
     } finally {
