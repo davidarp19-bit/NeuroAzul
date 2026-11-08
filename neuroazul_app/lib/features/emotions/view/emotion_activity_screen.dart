@@ -1,45 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../data/emotion_item.dart';
+import '../viewmodel/emotion_viewmodel.dart';
 
-class EmotionActivityScreen extends StatefulWidget {
+class EmotionActivityScreen extends ConsumerStatefulWidget {
   final String profileId;
 
   const EmotionActivityScreen({super.key, required this.profileId});
 
   @override
-  State<EmotionActivityScreen> createState() => _EmotionActivityScreenState();
+  ConsumerState<EmotionActivityScreen> createState() =>
+      _EmotionActivityScreenState();
 }
 
-class _EmotionActivityScreenState extends State<EmotionActivityScreen> {
+class _EmotionActivityScreenState extends ConsumerState<EmotionActivityScreen> {
   int _currentQuestion = 0;
   String? _selectedId;
   bool? _isCorrect;
 
   final List<_EmotionQuestion> _questions = const [
     _EmotionQuestion(
+      id: 'emotion_happy',
       prompt: '¿Cómo se siente una persona cuando recibe una buena noticia?',
       correctId: 'happy',
     ),
     _EmotionQuestion(
+      id: 'emotion_sad',
       prompt:
           '¿Cómo se siente una persona cuando pierde algo que quería mucho?',
       correctId: 'sad',
     ),
     _EmotionQuestion(
+      id: 'emotion_angry',
       prompt: '¿Cómo se siente una persona cuando algo le molesta mucho?',
       correctId: 'angry',
     ),
   ];
 
-  void _selectEmotion(String id) {
+  Future<void> _selectEmotion(String id) async {
     final question = _questions[_currentQuestion];
+
+    final isCorrect = id == question.correctId;
+
+    final saved = await ref
+        .read(emotionViewModelProvider.notifier)
+        .registerAttempt(
+          profileId: widget.profileId,
+          questionId: question.id,
+          selectedEmotion: id,
+          isCorrect: isCorrect,
+        );
+
+    if (!mounted) return;
+
+    if (!saved) {
+      final error = ref.read(emotionViewModelProvider).errorMessage;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error ?? 'No fue posible registrar la respuesta.'),
+        ),
+      );
+
+      return;
+    }
 
     setState(() {
       _selectedId = id;
-      _isCorrect = id == question.correctId;
+      _isCorrect = isCorrect;
     });
   }
 
@@ -101,6 +132,8 @@ class _EmotionActivityScreenState extends State<EmotionActivityScreen> {
   Widget build(BuildContext context) {
     final question = _questions[_currentQuestion];
 
+    final emotionState = ref.watch(emotionViewModelProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Emociones'),
@@ -160,7 +193,7 @@ class _EmotionActivityScreenState extends State<EmotionActivityScreen> {
 
                       return InkWell(
                         borderRadius: BorderRadius.circular(18),
-                        onTap: _isCorrect == true
+                        onTap: emotionState.isSaving || _isCorrect == true
                             ? null
                             : () {
                                 _selectEmotion(emotion.id);
@@ -203,6 +236,16 @@ class _EmotionActivityScreenState extends State<EmotionActivityScreen> {
                     },
                   ),
 
+                  if (emotionState.isSaving) ...[
+                    const SizedBox(height: 24),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Registrando respuesta...',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ],
+
                   const SizedBox(height: 28),
 
                   if (_isCorrect == true)
@@ -233,10 +276,15 @@ class _EmotionActivityScreenState extends State<EmotionActivityScreen> {
 }
 
 class _EmotionQuestion {
+  final String id;
   final String prompt;
   final String correctId;
 
-  const _EmotionQuestion({required this.prompt, required this.correctId});
+  const _EmotionQuestion({
+    required this.id,
+    required this.prompt,
+    required this.correctId,
+  });
 }
 
 class _EmotionFeedbackCard extends StatelessWidget {
