@@ -191,6 +191,15 @@ class _ChildMenuScreenState extends ConsumerState<ChildMenuScreen> {
                       context.go('/child/${widget.profileId}/rewards');
                     },
                   ),
+
+                  _MenuCard(
+                    icon: Icons.insights_outlined,
+                    title: 'Mi progreso',
+                    description: 'Consulta puntos y recompensas.',
+                    onTap: () {
+                      context.go('/child/${widget.profileId}/progress');
+                    },
+                  ),
                 ],
               ),
             ),
