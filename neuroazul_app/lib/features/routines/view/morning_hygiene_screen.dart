@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../data/routine_step.dart';
+import '../viewmodel/routine_viewmodel.dart';
 
-class MorningHygieneScreen extends StatefulWidget {
+class MorningHygieneScreen extends ConsumerStatefulWidget {
   final String profileId;
 
   const MorningHygieneScreen({super.key, required this.profileId});
 
   @override
-  State<MorningHygieneScreen> createState() => _MorningHygieneScreenState();
+  ConsumerState<MorningHygieneScreen> createState() =>
+      _MorningHygieneScreenState();
 }
 
-class _MorningHygieneScreenState extends State<MorningHygieneScreen> {
+class _MorningHygieneScreenState extends ConsumerState<MorningHygieneScreen> {
   late List<RoutineStep> _steps;
 
   bool? _isCorrect;
@@ -22,8 +25,6 @@ class _MorningHygieneScreenState extends State<MorningHygieneScreen> {
   void initState() {
     super.initState();
 
-    // Orden inicial deliberadamente diferente
-    // al orden correcto.
     _steps = [
       morningHygieneSteps[2],
       morningHygieneSteps[0],
@@ -39,15 +40,14 @@ class _MorningHygieneScreenState extends State<MorningHygieneScreen> {
       }
 
       final step = _steps.removeAt(oldIndex);
+
       _steps.insert(newIndex, step);
 
-      // Al mover nuevamente un elemento,
-      // eliminamos la retroalimentación anterior.
       _isCorrect = null;
     });
   }
 
-  void _checkSequence() {
+  Future<void> _checkSequence() async {
     bool correct = true;
 
     for (int index = 0; index < _steps.length; index++) {
@@ -55,6 +55,31 @@ class _MorningHygieneScreenState extends State<MorningHygieneScreen> {
         correct = false;
         break;
       }
+    }
+
+    final selectedOrder = _steps.map((step) => step.id).toList();
+
+    final saved = await ref
+        .read(routineViewModelProvider.notifier)
+        .registerAttempt(
+          profileId: widget.profileId,
+          routineId: 'morning_hygiene',
+          selectedOrder: selectedOrder,
+          isCorrect: correct,
+        );
+
+    if (!mounted) return;
+
+    if (!saved) {
+      final error = ref.read(routineViewModelProvider).errorMessage;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error ?? 'No fue posible registrar el intento.'),
+        ),
+      );
+
+      return;
     }
 
     setState(() {
@@ -109,6 +134,8 @@ class _MorningHygieneScreenState extends State<MorningHygieneScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final routineState = ref.watch(routineViewModelProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Higiene matutina'),
@@ -155,7 +182,7 @@ class _MorningHygieneScreenState extends State<MorningHygieneScreen> {
                     child: ReorderableListView.builder(
                       buildDefaultDragHandles: true,
                       itemCount: _steps.length,
-                      onReorder: _reorder,
+                      onReorder: routineState.isSaving ? (_, __) {} : _reorder,
                       itemBuilder: (context, index) {
                         final step = _steps[index];
 
@@ -187,6 +214,16 @@ class _MorningHygieneScreenState extends State<MorningHygieneScreen> {
                     ),
                   ),
 
+                  if (routineState.isSaving) ...[
+                    const SizedBox(height: 12),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Registrando intento...',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ],
+
                   if (_isCorrect == true)
                     _RoutineFeedbackCard(
                       icon: Icons.check_circle_outline,
@@ -215,7 +252,9 @@ class _MorningHygieneScreenState extends State<MorningHygieneScreen> {
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: _resetSequence,
+                          onPressed: routineState.isSaving
+                              ? null
+                              : _resetSequence,
                           icon: const Icon(Icons.restart_alt),
                           label: const Text('Reiniciar'),
                         ),
@@ -225,7 +264,9 @@ class _MorningHygieneScreenState extends State<MorningHygieneScreen> {
 
                       Expanded(
                         child: FilledButton.icon(
-                          onPressed: _checkSequence,
+                          onPressed: routineState.isSaving
+                              ? null
+                              : _checkSequence,
                           icon: const Icon(Icons.check),
                           label: const Text('Comprobar'),
                         ),
