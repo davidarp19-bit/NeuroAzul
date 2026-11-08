@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../features/gamification/view/achievements_screen.dart';
 import '../../features/routines/view/feeding_routine_screen.dart';
 import '../../features/routines/view/morning_hygiene_screen.dart';
 import '../../features/routines/view/routine_selection_screen.dart';
@@ -182,11 +183,7 @@ class AppRouter {
         builder: (context, state) {
           final profileId = state.pathParameters['id']!;
 
-          return SectionPlaceholderScreen(
-            profileId: profileId,
-            title: 'Mis logros',
-            icon: Icons.emoji_events_outlined,
-          );
+          return AchievementsScreen(profileId: profileId);
         },
       ),
     ],
