@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../features/emotions/view/emotion_activity_screen.dart';
 import '../../features/auth/view/auth_choice_screen.dart';
 import '../../features/auth/view/login_screen.dart';
 import '../../features/auth/view/register_screen.dart';
@@ -137,11 +138,7 @@ class AppRouter {
         builder: (context, state) {
           final profileId = state.pathParameters['id']!;
 
-          return SectionPlaceholderScreen(
-            profileId: profileId,
-            title: 'Emociones',
-            icon: Icons.sentiment_satisfied_alt_outlined,
-          );
+          return EmotionActivityScreen(profileId: profileId);
         },
       ),
 
