@@ -1,0 +1,42 @@
+import 'package:flutter/material.dart';
+
+class RoutineStep {
+  final String id;
+  final String label;
+  final IconData icon;
+  final int correctPosition;
+
+  const RoutineStep({
+    required this.id,
+    required this.label,
+    required this.icon,
+    required this.correctPosition,
+  });
+}
+
+const morningHygieneSteps = [
+  RoutineStep(
+    id: 'wake_up',
+    label: 'Levantarse',
+    icon: Icons.wb_sunny_outlined,
+    correctPosition: 1,
+  ),
+  RoutineStep(
+    id: 'brush_teeth',
+    label: 'Cepillarse los dientes',
+    icon: Icons.cleaning_services_outlined,
+    correctPosition: 2,
+  ),
+  RoutineStep(
+    id: 'wash_face',
+    label: 'Lavarse la cara',
+    icon: Icons.water_drop_outlined,
+    correctPosition: 3,
+  ),
+  RoutineStep(
+    id: 'comb_hair',
+    label: 'Peinarse',
+    icon: Icons.face_retouching_natural_outlined,
+    correctPosition: 4,
+  ),
+];

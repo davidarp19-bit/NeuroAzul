@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../features/routines/view/morning_hygiene_screen.dart';
 import '../../features/emotions/view/emotion_activity_screen.dart';
 import '../../features/auth/view/auth_choice_screen.dart';
 import '../../features/auth/view/login_screen.dart';
@@ -148,11 +149,7 @@ class AppRouter {
         builder: (context, state) {
           final profileId = state.pathParameters['id']!;
 
-          return SectionPlaceholderScreen(
-            profileId: profileId,
-            title: 'Rutinas',
-            icon: Icons.format_list_numbered,
-          );
+          return MorningHygieneScreen(profileId: profileId);
         },
       ),
 
