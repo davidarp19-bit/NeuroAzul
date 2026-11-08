@@ -1,21 +1,32 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/database/database_providers.dart';
 import '../data/routine_repository.dart';
 
 class RoutineState {
   final bool isSaving;
+  final bool hasPendingSync;
   final String? errorMessage;
 
-  const RoutineState({this.isSaving = false, this.errorMessage});
+  const RoutineState({
+    this.isSaving = false,
+    this.hasPendingSync = false,
+    this.errorMessage,
+  });
 
   RoutineState copyWith({
     bool? isSaving,
+    bool? hasPendingSync,
     String? errorMessage,
     bool clearError = false,
   }) {
     return RoutineState(
       isSaving: isSaving ?? this.isSaving,
+      hasPendingSync: hasPendingSync ?? this.hasPendingSync,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
@@ -40,26 +51,67 @@ class RoutineViewModel extends Notifier<RoutineState> {
     required List<String> selectedOrder,
     required bool isCorrect,
   }) async {
-    state = state.copyWith(isSaving: true, clearError: true);
+    state = state.copyWith(
+      isSaving: true,
+      hasPendingSync: false,
+      clearError: true,
+    );
 
     try {
-      final repository = ref.read(routineRepositoryProvider);
+      final localRepository = ref.read(localAttemptRepositoryProvider);
 
-      await repository.registerAttempt(
+      final localId = await localRepository.saveAttempt(
         profileId: profileId,
-        routineId: routineId,
-        selectedOrder: selectedOrder,
+        activityType: 'routine',
+        activityId: routineId,
+        selectedValue: jsonEncode(selectedOrder),
         isCorrect: isCorrect,
       );
 
-      return true;
-    } on PostgrestException catch (error) {
-      state = state.copyWith(errorMessage: error.message);
+      try {
+        final remoteRepository = ref.read(routineRepositoryProvider);
 
-      return false;
-    } catch (_) {
+        await remoteRepository.registerAttempt(
+          profileId: profileId,
+          routineId: routineId,
+          selectedOrder: selectedOrder,
+          isCorrect: isCorrect,
+        );
+
+        await localRepository.markAsSynced(localId: localId);
+
+        state = state.copyWith(hasPendingSync: false, clearError: true);
+
+        return true;
+      } on PostgrestException catch (error) {
+        debugPrint(
+          'ROUTINE pendiente de sincronización: '
+          '${error.message}',
+        );
+
+        state = state.copyWith(hasPendingSync: true, clearError: true);
+
+        return true;
+      } catch (error) {
+        debugPrint(
+          'ROUTINE pendiente de sincronización: '
+          '$error',
+        );
+
+        state = state.copyWith(hasPendingSync: true, clearError: true);
+
+        return true;
+      }
+    } catch (error, stackTrace) {
+      debugPrint('ERROR AL GUARDAR ROUTINE EN DRIFT: $error');
+
+      debugPrintStack(
+        label: 'STACK TRACE ROUTINE DRIFT',
+        stackTrace: stackTrace,
+      );
+
       state = state.copyWith(
-        errorMessage: 'No fue posible registrar el intento de la rutina.',
+        errorMessage: 'No fue posible guardar la rutina en el dispositivo.',
       );
 
       return false;

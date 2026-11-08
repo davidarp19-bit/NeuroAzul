@@ -65,7 +65,7 @@ class SyncViewModel extends Notifier<SyncState> {
     try {
       final service = ref.read(syncServiceProvider);
 
-      final synchronized = await service.syncPendingPictograms(
+      final synchronized = await service.syncPendingAttempts(
         profileId: profileId,
       );
 
