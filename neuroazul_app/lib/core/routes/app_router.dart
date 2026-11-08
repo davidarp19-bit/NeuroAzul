@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../features/routines/view/feeding_routine_screen.dart';
+import '../../features/routines/view/morning_hygiene_screen.dart';
+import '../../features/routines/view/routine_selection_screen.dart';
 import '../../features/routines/view/morning_hygiene_screen.dart';
 import '../../features/emotions/view/emotion_activity_screen.dart';
 import '../../features/auth/view/auth_choice_screen.dart';
@@ -149,7 +152,27 @@ class AppRouter {
         builder: (context, state) {
           final profileId = state.pathParameters['id']!;
 
+          return RoutineSelectionScreen(profileId: profileId);
+        },
+      ),
+
+      GoRoute(
+        path: '/child/:id/routines/hygiene',
+        name: 'child-routine-hygiene',
+        builder: (context, state) {
+          final profileId = state.pathParameters['id']!;
+
           return MorningHygieneScreen(profileId: profileId);
+        },
+      ),
+
+      GoRoute(
+        path: '/child/:id/routines/feeding',
+        name: 'child-routine-feeding',
+        builder: (context, state) {
+          final profileId = state.pathParameters['id']!;
+
+          return FeedingRoutineScreen(profileId: profileId);
         },
       ),
 

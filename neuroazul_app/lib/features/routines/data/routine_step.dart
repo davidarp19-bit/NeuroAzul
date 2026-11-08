@@ -40,3 +40,30 @@ const morningHygieneSteps = [
     correctPosition: 4,
   ),
 ];
+
+const feedingRoutineSteps = [
+  RoutineStep(
+    id: 'wash_hands',
+    label: 'Lavarse las manos',
+    icon: Icons.wash_outlined,
+    correctPosition: 1,
+  ),
+  RoutineStep(
+    id: 'sit_at_table',
+    label: 'Sentarse a la mesa',
+    icon: Icons.chair_outlined,
+    correctPosition: 2,
+  ),
+  RoutineStep(
+    id: 'eat_food',
+    label: 'Comer los alimentos',
+    icon: Icons.restaurant_outlined,
+    correctPosition: 3,
+  ),
+  RoutineStep(
+    id: 'clean_up',
+    label: 'Recoger después de comer',
+    icon: Icons.cleaning_services_outlined,
+    correctPosition: 4,
+  ),
+];
