@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configurar Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -63,11 +63,35 @@ jobs:
       - name: Ejecutar pruebas automatizadas
         run: flutter test
 
+      - name: Verificar version de SQLite
+        run: flutter pub deps | grep sqlite3 || true
+
       - name: Compilar APK release
         run: |
-          flutter build apk \
-            --release \
-            --dart-define-from-file=config/supabase.json
+          set -e
+
+          for intento in 1 2 3
+          do
+            echo "Intento de compilacion $intento de 3"
+
+            if flutter build apk \
+              --release \
+              --dart-define-from-file=config/supabase.json
+            then
+              echo "APK compilado correctamente"
+              exit 0
+            fi
+
+            echo "La compilacion fallo. Limpiando descargas temporales de hooks..."
+            rm -rf .dart_tool/hooks_runner
+
+            if [ "$intento" -lt 3 ]; then
+              sleep 15
+            fi
+          done
+
+          echo "La compilacion fallo despues de 3 intentos"
+          exit 1
 
       - name: Preparar APK de NeuroAzul
         run: |
