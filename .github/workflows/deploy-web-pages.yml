@@ -1,0 +1,95 @@
+name: Deploy NeuroAzul Web to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: neuroazul_app
+
+    steps:
+      - name: Obtener codigo fuente
+        uses: actions/checkout@v6
+
+      - name: Instalar Flutter 3.47.9
+        run: |
+          git clone https://github.com/flutter/flutter.git \
+            --depth 1 \
+            --branch 3.47.9 \
+            "$HOME/flutter"
+          echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
+
+      - name: Verificar Flutter
+        run: flutter --version
+
+      - name: Instalar dependencias
+        run: flutter pub get
+
+      - name: Crear configuracion de Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          mkdir -p config
+          python3 - <<'PY'
+          import json
+          import os
+
+          config = {
+              "SUPABASE_URL": os.environ["SUPABASE_URL"],
+              "SUPABASE_PUBLISHABLE_KEY": os.environ["SUPABASE_PUBLISHABLE_KEY"],
+          }
+
+          with open("config/supabase.json", "w") as file:
+              json.dump(config, file)
+          PY
+
+      - name: Ejecutar pruebas automatizadas
+        run: flutter test
+
+      - name: Compilar NeuroAzul Web
+        run: |
+          flutter build web \
+            --release \
+            --base-href "/NeuroAzul/" \
+            --dart-define-from-file=config/supabase.json
+
+      - name: Configurar navegacion SPA
+        run: cp build/web/index.html build/web/404.html
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Cargar artefacto Web
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: neuroazul_app/build/web
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Publicar NeuroAzul
+        id: deployment
+        uses: actions/deploy-pages@v4
