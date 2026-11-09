@@ -1,0 +1,116 @@
+name: Build NeuroAzul Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - android-release
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: neuroazul_app
+
+    steps:
+      - name: Obtener codigo fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Instalar Flutter 3.47.9
+        run: |
+          git clone https://github.com/flutter/flutter.git \
+            --depth 1 \
+            --branch 3.47.9 \
+            "$HOME/flutter"
+          echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
+
+      - name: Verificar Flutter
+        run: flutter --version
+
+      - name: Instalar dependencias
+        run: flutter pub get
+
+      - name: Crear configuracion de Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          mkdir -p config
+          python3 - <<'PY'
+          import json
+          import os
+
+          config = {
+              "SUPABASE_URL": os.environ["SUPABASE_URL"],
+              "SUPABASE_PUBLISHABLE_KEY": os.environ["SUPABASE_PUBLISHABLE_KEY"],
+          }
+
+          with open("config/supabase.json", "w") as file:
+              json.dump(config, file)
+          PY
+
+      - name: Ejecutar pruebas automatizadas
+        run: flutter test
+
+      - name: Verificar version de SQLite
+        run: flutter pub deps | grep sqlite3 || true
+
+      - name: Compilar APK release
+        run: |
+          set -e
+
+          for intento in 1 2 3
+          do
+            echo "Intento de compilacion $intento de 3"
+
+            if flutter build apk \
+              --release \
+              --dart-define-from-file=config/supabase.json
+            then
+              echo "APK compilado correctamente"
+              exit 0
+            fi
+
+            echo "La compilacion fallo. Limpiando descargas temporales de hooks..."
+            rm -rf .dart_tool/hooks_runner
+
+            if [ "$intento" -lt 3 ]; then
+              sleep 15
+            fi
+          done
+
+          echo "La compilacion fallo despues de 3 intentos"
+          exit 1
+
+      - name: Preparar APK de NeuroAzul
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             build/app/outputs/flutter-apk/NeuroAzul-v1.0.0.apk
+
+      - name: Calcular SHA-256
+        run: |
+          sha256sum \
+            build/app/outputs/flutter-apk/NeuroAzul-v1.0.0.apk \
+            | tee build/app/outputs/flutter-apk/NeuroAzul-v1.0.0.sha256
+
+      - name: Guardar APK como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: NeuroAzul-v1.0.0-Android
+          path: |
+            neuroazul_app/build/app/outputs/flutter-apk/NeuroAzul-v1.0.0.apk
+            neuroazul_app/build/app/outputs/flutter-apk/NeuroAzul-v1.0.0.sha256
+          if-no-files-found: error
+          retention-days: 30
