@@ -1,14 +1,12 @@
 import '../../features/pictograms/view/pictogram_activity_screen.dart';
 import '../../core/sync/sync_status_screen.dart';
 
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../features/progress/view/progress_screen.dart';
 import '../../features/gamification/view/achievements_screen.dart';
 import '../../features/routines/view/feeding_routine_screen.dart';
-import '../../features/routines/view/morning_hygiene_screen.dart';
 import '../../features/routines/view/routine_selection_screen.dart';
 import '../../features/routines/view/morning_hygiene_screen.dart';
 import '../../features/emotions/view/emotion_activity_screen.dart';
@@ -16,7 +14,6 @@ import '../../features/auth/view/auth_choice_screen.dart';
 import '../../features/auth/view/login_screen.dart';
 import '../../features/auth/view/register_screen.dart';
 import '../../features/child_menu/view/child_menu_screen.dart';
-import '../../features/child_menu/view/section_placeholder_screen.dart';
 import '../../features/profile/view/avatar_selection_screen.dart';
 import '../../features/profile/view/create_profile_screen.dart';
 import '../../features/profile/view/edit_profile_screen.dart';

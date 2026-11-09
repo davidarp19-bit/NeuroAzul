@@ -34,10 +34,6 @@ class _FeedingRoutineScreenState extends ConsumerState<FeedingRoutineScreen> {
 
   void _reorder(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
-
       final step = _steps.removeAt(oldIndex);
 
       _steps.insert(newIndex, step);
@@ -181,7 +177,9 @@ class _FeedingRoutineScreenState extends ConsumerState<FeedingRoutineScreen> {
                     child: ReorderableListView.builder(
                       buildDefaultDragHandles: true,
                       itemCount: _steps.length,
-                      onReorder: routineState.isSaving ? (_, __) {} : _reorder,
+                      onReorderItem: routineState.isSaving
+                          ? (_, _) {}
+                          : _reorder,
                       itemBuilder: (context, index) {
                         final step = _steps[index];
 
